@@ -1,15 +1,25 @@
 # Registers the layer manifest under the system-wide implicit API layers key.
 # SteamVR's embedded OpenXR runtime only reads HKLM (not HKCU) for implicit
 # layers, so admin access is required. The script self-elevates if needed.
+#
+# Before registering, removes any existing PSVR2PassthroughLayer entries from
+# both HKLM and HKCU so stale registrations from previous installs are cleaned up.
 
 param([string]$ManifestPath = "")
 
 # Discover manifest: alongside this script (release layout) or in the build tree (dev layout).
+# Matches versioned filenames e.g. PSVR2PassthroughLayer-051a.json as well as the plain name.
 if (-not $ManifestPath) {
-    if (Test-Path "$PSScriptRoot\PSVR2PassthroughLayer.json") {
-        $ManifestPath = "$PSScriptRoot\PSVR2PassthroughLayer.json"
+    $local = Get-ChildItem -Path $PSScriptRoot -Filter "PSVR2PassthroughLayer*.json" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($local) {
+        $ManifestPath = $local.FullName
     } else {
-        $ManifestPath = "$PSScriptRoot\..\build\src\layer\Release\PSVR2PassthroughLayer.json"
+        $build = Get-ChildItem -Path "$PSScriptRoot\..\build\src\layer\Release" -Filter "PSVR2PassthroughLayer*.json" -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($build) { $ManifestPath = $build.FullName }
+    }
+    if (-not $ManifestPath) {
+        Write-Error "No PSVR2PassthroughLayer*.json manifest found. Build the project first."
+        exit 1
     }
 }
 
@@ -29,14 +39,18 @@ if (-not (Test-Path $manifest)) {
     exit 1
 }
 
-# Remove any leftover HKCU registration (SteamVR ignores HKCU; stale entry
-# would only appear in OpenXR Layers GUI and cause confusion).
-$hkcuKey = "HKCU:\Software\Khronos\OpenXR\1\ApiLayers\Implicit"
-if (Test-Path $hkcuKey) {
-    $existing = Get-ItemProperty -Path $hkcuKey -ErrorAction SilentlyContinue
-    if ($existing.PSObject.Properties[$manifest]) {
-        Remove-ItemProperty -Path $hkcuKey -Name $manifest -ErrorAction SilentlyContinue
-        Write-Host "Removed stale HKCU registration."
+# Remove ALL existing PSVR2PassthroughLayer registrations from both HKLM and HKCU.
+# This handles users upgrading from a previous install in a different folder.
+foreach ($hive in @("HKLM:\Software\Khronos\OpenXR\1\ApiLayers\Implicit",
+                    "HKCU:\Software\Khronos\OpenXR\1\ApiLayers\Implicit")) {
+    if (-not (Test-Path $hive)) { continue }
+    $props = Get-ItemProperty -Path $hive -ErrorAction SilentlyContinue
+    if (-not $props) { continue }
+    foreach ($name in $props.PSObject.Properties.Name) {
+        if ($name -like "*PSVR2PassthroughLayer*") {
+            Remove-ItemProperty -Path $hive -Name $name -ErrorAction SilentlyContinue
+            Write-Host "Removed previous registration: $name"
+        }
     }
 }
 
