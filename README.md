@@ -2,7 +2,12 @@
 
 An OpenXR implicit API layer that injects real-time stereo passthrough from the PSVR2's built-in bottom cameras into any OpenXR application running under SteamVR on PC.
 
-<img width="1266" height="636" alt="repository-open-graph-template" src="https://github.com/user-attachments/assets/db3b4f1e-ad0c-4bc6-9feb-77585c79bb57" />
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=WyVbhiK8BAc" target="_blank" rel="noopener">
+    <img width="999" height="502" alt="cockpit_play" src="https://github.com/user-attachments/assets/922cfcb3-210d-42e7-8181-653bba3b864a" />
+  </a>
+</p>
+
 
 ## Wait...What? What does this do?
 The image above shows it : Blend the real world with your game using the headsets cameras.  
