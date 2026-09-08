@@ -12,7 +12,7 @@ An OpenXR implicit API layer that injects real-time stereo passthrough from the 
 ## Wait...What? What does this do?
 The image above shows it : Blend the real world with your game using the headsets cameras.  
 
-Watch https://www.youtube.com/watch?v=WyVbhiK8BAc for a live demo. 
+Watch https://www.youtube.com/watch?v=G4Bc2gbUnso for a live demo. 
 
 ## Features
 - Button-gated passthrough: keyboard keys, XInput gamepad buttons, DirectInput HOTAS/joystick buttons
