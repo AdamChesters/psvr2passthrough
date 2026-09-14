@@ -4,8 +4,8 @@
         "name": "XR_APILAYER_NOVENDOR_psvr2_passthrough",
         "library_path": ".\\PSVR2PassthroughLayer.dll",
         "api_version": "1.0",
-        "implementation_version": "1",
-        "description": "Selective passthrough for PSVR2 PC adapter using lower stereo cameras.",
+        "implementation_version": "7",
+        "description": "Hybrid beta: PSVR2Toolkit camera feed with OpenXR passthrough controls.",
         "functions": {
             "xrNegotiateLoaderApiLayerInterface": "xrNegotiateLoaderApiLayerInterface"
         },

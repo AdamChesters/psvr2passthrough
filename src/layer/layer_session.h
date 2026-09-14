@@ -71,14 +71,6 @@ public:
     }
     void set_toggle_mode(bool t) { toggle_mode_ = t; }
     void set_force_on(bool f)    { force_on_ = f; }
-    void update_clock_offset(int64_t ns)                 { clock_offset_ns_.store(ns, std::memory_order_relaxed); }
-    void set_view_config_type(XrViewConfigurationType t) { view_config_type_ = t; }
-    void set_camera_latency_offset_ns(int64_t ns)        { camera_latency_offset_ns_ = ns; }
-    void set_debug_reproj_stats(bool v)                  { debug_reproj_stats_ = v; }
-    void set_ipd_correction(bool enabled, float camera_sep_mm) {
-        ipd_correction_enabled_ = enabled;
-        camera_separation_m_    = camera_sep_mm / 1000.f;
-    }
 
 private:
     void common_init_();   // shared ctor body for both graphics modes
@@ -100,7 +92,13 @@ private:
 
     std::unique_ptr<CameraSource>  camera_;
     std::unique_ptr<Compositor>    compositor_;
-    StereoFrame cached_frame_;   // persists between frames so try_get_latest swap recycles buffers
+    CameraFrame cached_frame_;
+    uint32_t rendered_sequence_ = 0;
+    int64_t rendered_exposure_ = 0;
+    bool rendered_ = false;
+    bool targets_ready_ = false;
+    bool timing_warning_ = false;
+    bool timing_announced_ = false;
 
     // Passthrough visibility state.
     BindingPoller poller_;
@@ -119,6 +117,8 @@ private:
         // created once (the swapchain image ring is fixed) and reused. Parallel
         // to images12 by index. D3D11On12 only.
         std::vector<Microsoft::WRL::ComPtr<ID3D11Texture2D>> wrapped;
+        bool acquired = false, waited = false;
+        uint32_t index = 0;
         uint32_t                              width  = 0;
         uint32_t                              height = 0;
     };
@@ -143,35 +143,6 @@ private:
     std::array<XrCompositionLayerProjectionView, 2> projection_views_{};
 
     CompositorConfig config_{};
-
-    // OpenXR eye poses captured at the moment each new camera frame arrives.
-    // Submitted as the layer pose so ATW corrects from capture-time orientation
-    // to display-time orientation - entirely in OpenXR space.
-    std::array<XrPosef, 2> captured_eye_pose_{};
-    bool has_captured_eye_pose_ = false;
-
-    // Clock calibration: predictedDisplayTime - steady_clock_ns, updated each xrWaitFrame.
-    // Includes runtime display prediction window bias (~8ms typical); absorbed into
-    // camera_latency_offset_ns_ during empirical tuning.
-    std::atomic<int64_t>    clock_offset_ns_{0};
-    XrViewConfigurationType view_config_type_{XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO};
-    int64_t                 camera_latency_offset_ns_{16'000'000};
-    bool                    debug_reproj_stats_{false};
-
-    // IPD correction state.
-    bool  ipd_correction_enabled_ = false;
-    float camera_separation_m_    = 0.080f;
-    float last_ipd_m_             = -1.f;   // sentinel — forces update on first frame
-
-    // Reprojection probe and 1Hz stats state.
-    bool    reproj_probe_logged_     = false;
-    int64_t reproj_invalid_total_    = 0;
-    bool    reproj_stat_initialized_ = false;
-    int64_t reproj_stat_count_       = 0;
-    int64_t reproj_stat_invalid_     = 0;
-    double  reproj_stat_delta_sum_   = 0.0;
-    double  reproj_stat_delta_max_   = 0.0;
-    std::chrono::steady_clock::time_point reproj_stat_epoch_{};
 
     bool ready_ = false;
 };

@@ -1,11 +1,7 @@
 add_library(psvr2pt_core STATIC
-    shared_memory.cpp
-    shared_memory.h
-    distortion.cpp
-    distortion.h
     camera_source.cpp
     camera_source.h
-    frame.h
+    camera_geometry.h
     logging.cpp
     logging.h
     input_binding.cpp
@@ -14,7 +10,7 @@ add_library(psvr2pt_core STATIC
 
 target_include_directories(psvr2pt_core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/third_party/openvr
 )
 
 target_link_libraries(psvr2pt_core PUBLIC
@@ -22,7 +18,7 @@ target_link_libraries(psvr2pt_core PUBLIC
     fmt::fmt
     dinput8
     dxguid
-    xinput
+    xinput9_1_0
     rpcrt4
 )
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(PSVR2PassthroughLayer LANGUAGES CXX)
+project(PSVR2PassthroughLayer VERSION 0.7.0 LANGUAGES CXX)
 
 if(NOT WIN32)
     message(FATAL_ERROR "This project targets Windows only (PSVR2 PC adapter is Windows-only).")
@@ -11,7 +11,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Statically link the MSVC runtime so the resulting DLL doesn't have unexpected
 # runtime dependencies when injected into arbitrary OpenXR host processes.
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 # vcpkg integration ----------------------------------------------------------
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
@@ -22,16 +22,30 @@ endif()
 
 # Dependencies ---------------------------------------------------------------
 find_package(OpenXR CONFIG REQUIRED)        # vcpkg: openxr-loader
-find_package(directxtk CONFIG REQUIRED)     # vcpkg: directxtk
+find_package(nlohmann_json CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)           # vcpkg: fmt
 find_package(spdlog CONFIG REQUIRED)        # vcpkg: spdlog
 find_package(imgui CONFIG REQUIRED)         # vcpkg: imgui[win32-binding,dx11-binding]
 
-# DirectXMath ships with the Windows SDK - no find_package needed.
+# Camera geometry uses portable scalar math; no DirectXMath/DirectXTK dependency.
+
+# Pin the OpenVR runtime to the vendored header revision. Never resolve a
+# mutable branch or accept an unchecked binary during a build.
+set(PSVR2_OPENVR_DLL "${CMAKE_BINARY_DIR}/openvr_api.dll" CACHE FILEPATH "Pinned OpenVR runtime DLL")
+set(PSVR2_OPENVR_SHA256 "bab8ac6ef64e68a9ca53315b0014d131088584b2efdfa6db511d67ec03cfcb4a")
+if(NOT EXISTS "${PSVR2_OPENVR_DLL}")
+    file(DOWNLOAD
+        "https://raw.githubusercontent.com/ValveSoftware/openvr/0924064316de3effbcd1acf1e309182a2deb1c05/bin/win64/openvr_api.dll"
+        "${PSVR2_OPENVR_DLL}" EXPECTED_HASH "SHA256=${PSVR2_OPENVR_SHA256}" TLS_VERIFY ON)
+endif()
+file(SHA256 "${PSVR2_OPENVR_DLL}" actual_openvr_hash)
+if(NOT actual_openvr_hash STREQUAL PSVR2_OPENVR_SHA256)
+    message(FATAL_ERROR "OpenVR runtime does not match the pinned SDK")
+endif()
 
 # Subprojects ----------------------------------------------------------------
 add_subdirectory(src/config)      # shared config (used by both layer and GUI)
-add_subdirectory(src/core)        # camera ingest, undistortion, shared-memory, input binding
+add_subdirectory(src/core)        # Toolkit camera adapter and input binding
 add_subdirectory(src/render)      # D3D11 compositor used by the layer
 add_subdirectory(src/layer)       # the actual OpenXR API layer DLL
 add_subdirectory(src/gui)         # standalone configurator executable

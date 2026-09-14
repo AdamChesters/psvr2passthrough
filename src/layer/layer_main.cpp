@@ -57,12 +57,27 @@ XrResult XRAPI_CALL pt_xrCreateApiLayerInstance(const XrInstanceCreateInfo* crea
     XrApiLayerCreateInfo nextLayerInfo = *layerInfo;
     nextLayerInfo.nextInfo = layerInfo->nextInfo->next;
 
-    XrResult r = layerInfo->nextInfo->nextCreateApiLayerInstance(
-        createInfo, &nextLayerInfo, instance);
+    if (!createInfo) return XR_ERROR_VALIDATION_FAILURE;
+    std::vector<const char*> extensions;
+    bool clock_requested=false;
+    for (uint32_t i=0; i<createInfo->enabledExtensionCount; ++i) {
+        extensions.push_back(createInfo->enabledExtensionNames[i]);
+        if (std::strcmp(extensions.back(),XR_KHR_WIN32_CONVERT_PERFORMANCE_COUNTER_TIME_EXTENSION_NAME)==0) clock_requested=true;
+    }
+    if (!clock_requested) extensions.push_back(XR_KHR_WIN32_CONVERT_PERFORMANCE_COUNTER_TIME_EXTENSION_NAME);
+    XrInstanceCreateInfo extended=*createInfo;
+    extended.enabledExtensionCount=static_cast<uint32_t>(extensions.size()); extended.enabledExtensionNames=extensions.data();
+    bool clock_enabled=true;
+    XrResult r=layerInfo->nextInfo->nextCreateApiLayerInstance(&extended,&nextLayerInfo,instance);
+    if (r == XR_ERROR_EXTENSION_NOT_PRESENT && !clock_requested) {
+        clock_enabled=false;
+        r=layerInfo->nextInfo->nextCreateApiLayerInstance(createInfo,&nextLayerInfo,instance);
+    }
     if (XR_FAILED(r)) return r;
 
     auto* state = LayerState::get().add(*instance);
     state->instance = *instance;
+    state->next.instance = *instance;
 
     // Cache the next layer's xrGetInstanceProcAddr so we can resolve everything
     // through it.
@@ -92,6 +107,9 @@ XrResult XRAPI_CALL pt_xrCreateApiLayerInstance(const XrInstanceCreateInfo* crea
     resolve("xrAcquireSwapchainImage",   reinterpret_cast<PFN_xrVoidFunction*>(&state->next.xrAcquireSwapchainImage));
     resolve("xrWaitSwapchainImage",      reinterpret_cast<PFN_xrVoidFunction*>(&state->next.xrWaitSwapchainImage));
     resolve("xrReleaseSwapchainImage",   reinterpret_cast<PFN_xrVoidFunction*>(&state->next.xrReleaseSwapchainImage));
+
+    if (clock_enabled) resolve("xrConvertWin32PerformanceCounterToTimeKHR",
+        reinterpret_cast<PFN_xrVoidFunction*>(&state->next.convert_time));
 
     // Load config once. Changes apply on next process launch.
     state->config = load_config();
@@ -158,29 +176,10 @@ XrResult XRAPI_CALL pt_xrDestroyInstance(XrInstance instance) {
 static void apply_config_to_session(InstanceState* state) {
     auto& cc = state->session->config();
     cc.global_alpha             = state->config.global_alpha;
-    cc.brightness_enabled       = state->config.brightness_enabled;
-    cc.brightness               = state->config.brightness;
-    cc.contrast_enabled         = state->config.contrast_enabled;
-    cc.contrast                 = state->config.contrast;
-    cc.enhancements_enabled     = state->config.enhancements_enabled;
-    cc.unsharp_amount           = state->config.unsharp_amount;
-    cc.unsharp_radius           = state->config.unsharp_radius;
-    cc.apply_undistortion       = state->config.apply_undistortion;
-    cc.zoom_factor              = state->config.zoom_factor;
-    cc.reprojection_enabled     = state->config.reprojection_enabled;
-    state->session->set_camera_latency_offset_ns(state->config.camera_latency_offset_ns);
-    state->session->set_debug_reproj_stats(state->config.debug_reprojection_stats);
-    cc.camera_toe_out_rad_l     = state->config.camera_toe_out_rad_l;
-    cc.camera_tilt_down_rad_l   = state->config.camera_tilt_down_rad_l;
-    cc.camera_roll_rad_l        = state->config.camera_roll_rad_l;
-    cc.camera_toe_out_rad_r     = state->config.camera_toe_out_rad_r;
-    cc.camera_tilt_down_rad_r   = state->config.camera_tilt_down_rad_r;
-    cc.camera_roll_rad_r        = state->config.camera_roll_rad_r;
     state->session->set_passthrough_binding(state->config.passthrough_binding);
     state->session->set_toggle_mode(state->config.toggle_mode);
     state->session->set_force_on(state->config.force_passthrough_on);
-    state->session->set_ipd_correction(state->config.ipd_correction_enabled,
-                                       state->config.camera_separation_mm);
+
 }
 
 XrResult XRAPI_CALL pt_xrCreateSession(XrInstance instance,
@@ -219,6 +218,8 @@ XrResult XRAPI_CALL pt_xrCreateSession(XrInstance instance,
             // keep scanning in case a D3D11 binding also appears (prefer it)
         }
     }
+
+    if (!state->config.enabled) return r;
 
     if (d3d11_device) {
         state->session = std::make_unique<LayerSession>(*session, &state->next, d3d11_device);
@@ -277,14 +278,13 @@ XrResult XRAPI_CALL pt_xrBeginSession(XrSession session, const XrSessionBeginInf
     const XrResult r = state->next.xrBeginSession(session, beginInfo);
     if (XR_SUCCEEDED(r) && beginInfo) {
         state->view_config_type = beginInfo->primaryViewConfigurationType;
-        if (state->session)
-            state->session->set_view_config_type(beginInfo->primaryViewConfigurationType);
+
     }
     return r;
 }
 
 // ===========================================================================
-// xrWaitFrame — update clock calibration offset for reprojection timestamps.
+// xrWaitFrame: pass through. Exposure timing uses the QPC extension directly.
 // ===========================================================================
 
 XrResult XRAPI_CALL pt_xrWaitFrame(XrSession session,
@@ -293,14 +293,7 @@ XrResult XRAPI_CALL pt_xrWaitFrame(XrSession session,
     auto* state = LayerState::get().find_for_session(session);
     if (!state || !state->next.xrWaitFrame) return XR_ERROR_HANDLE_INVALID;
 
-    const XrResult r = state->next.xrWaitFrame(session, frameWaitInfo, frameState);
-    if (XR_SUCCEEDED(r) && frameState && state->session) {
-        const int64_t steady_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
-            std::chrono::steady_clock::now().time_since_epoch()).count();
-        state->session->update_clock_offset(
-            static_cast<int64_t>(frameState->predictedDisplayTime) - steady_ns);
-    }
-    return r;
+    return state->next.xrWaitFrame(session, frameWaitInfo, frameState);
 }
 
 // ===========================================================================
@@ -314,7 +307,10 @@ XrResult XRAPI_CALL pt_xrEndFrame(XrSession session, const XrFrameEndInfo* frame
     if (!state->session || !state->config.enabled)
         return state->next.xrEndFrame(session, frameEndInfo);
 
-    const XrCompositionLayerBaseHeader* extra = state->session->compose_layer(frameEndInfo);
+    const XrCompositionLayerBaseHeader* extra = nullptr;
+    try { extra = state->session->compose_layer(frameEndInfo); }
+    catch (const std::exception& e) { PT_LOG_ERROR("Passthrough frame failed: {}",e.what()); }
+    catch (...) { PT_LOG_ERROR("Passthrough frame failed with an unknown exception"); }
     if (!extra)
         return state->next.xrEndFrame(session, frameEndInfo);
 

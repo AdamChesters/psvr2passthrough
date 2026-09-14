@@ -29,6 +29,8 @@ class LayerSession;       // forward
 // Per-instance dispatch table — holds pointers to the *next* layer's
 // implementations of each function we intercept. We forward to these.
 struct InstanceDispatch {
+    XrInstance instance{XR_NULL_HANDLE};
+    PFN_xrConvertWin32PerformanceCounterToTimeKHR convert_time = nullptr;
     // Lifecycle.
     PFN_xrGetInstanceProcAddr     xrGetInstanceProcAddr     = nullptr;
     PFN_xrDestroyInstance         xrDestroyInstance         = nullptr;
