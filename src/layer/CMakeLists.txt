@@ -14,7 +14,6 @@ target_link_libraries(PSVR2PassthroughLayer
         psvr2pt_config
         psvr2pt_render
         OpenXR::headers
-        OpenXR::openxr_loader
         d3d11
         d3d12      # D3D12 host-game interop (D3D11On12 path)
 )
@@ -47,9 +46,13 @@ add_custom_command(
     TARGET PSVR2PassthroughLayer POST_BUILD
     COMMAND ${CMAKE_COMMAND}
         -DSOURCE=${CMAKE_SOURCE_DIR}/cmake/PSVR2PassthroughLayer.json.in
-        -DDEST=$<TARGET_FILE_DIR:PSVR2PassthroughLayer>/PSVR2PassthroughLayer-06a.json
+        -DDEST=$<TARGET_FILE_DIR:PSVR2PassthroughLayer>/PSVR2PassthroughLayer-hybrid-beta.json
         -DLIBRARY_PATH=$<TARGET_FILE:PSVR2PassthroughLayer>
         -P ${CMAKE_SOURCE_DIR}/cmake/GenerateManifest.cmake
     COMMENT "Generating OpenXR API layer manifest"
     VERBATIM
 )
+
+add_custom_command(TARGET PSVR2PassthroughLayer POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PSVR2_OPENVR_DLL}" "$<TARGET_FILE_DIR:PSVR2PassthroughLayer>/openvr_api.dll"
+    VERBATIM)

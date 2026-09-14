@@ -2,7 +2,6 @@
 
 #include "config.h"
 #include "input_binding.h"
-#include "update_checker.h"
 
 #include <d3d11.h>
 #include <memory>
@@ -42,7 +41,8 @@ private:
     ID3D11DeviceContext* ctx_    = nullptr;
 
     std::string   intrinsics_text_;   // cached snippet from calibration_dump.txt
-    UpdateChecker update_checker_;
+    double status_read_at_ = -2.0;
+    bool save_failed_ = false;
 };
 
 }  // namespace psvr2pt

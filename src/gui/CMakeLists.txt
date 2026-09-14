@@ -2,8 +2,6 @@ add_executable(PSVR2PassthroughConfig WIN32
     main.cpp
     config_window.cpp
     config_window.h
-    update_checker.cpp
-    update_checker.h
     version.h
 )
 

@@ -1,5 +1,6 @@
 add_library(psvr2pt_config STATIC
     config.cpp
+    config_json.cpp
     config.h
 )
 
@@ -14,5 +15,7 @@ target_compile_definitions(psvr2pt_config PUBLIC
 
 target_link_libraries(psvr2pt_config PUBLIC
     psvr2pt_core
-    Shlwapi.lib
+    nlohmann_json::nlohmann_json
+    shell32
+    ole32
 )

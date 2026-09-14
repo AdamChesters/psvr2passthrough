@@ -1,3 +1,5 @@
+> Legacy release notes. For the current worktree beta see [HYBRID-BETA.md](HYBRID-BETA.md).
+
 # Design notes
 
 ## Pipeline

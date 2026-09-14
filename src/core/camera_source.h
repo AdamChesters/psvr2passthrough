@@ -1,62 +1,39 @@
 #pragma once
 
-#include "frame.h"
-#include "distortion.h"
-#include "shared_memory.h"
-
-#include <atomic>
-#include <thread>
-#include <mutex>
+#include "camera_geometry.h"
+#include <d3d11.h>
+#include <wrl/client.h>
 #include <memory>
+#include <cstdint>
 
 namespace psvr2pt {
 
-// Owns the producer thread that reads camera frames from the PSVR2 driver
-// shared memory. Consumers call `try_get_latest()` to grab the most recent
-// stereo frame without blocking.
+struct CameraFrame {
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture;
+    uint32_t sequence = 0;
+    int64_t exposure_qpc = 0;
+    uint32_t width = 0, height = 0; // per-eye output, excludes texture padding
+    float bounds[4]{0, 0, 1, 1}; // whole stereo image, normalized texture coordinates
+    CameraPose camera_to_head[2];
+    CameraFov fov[2];
+};
+
+// Toolkit is the camera provider. We consume its maximum-undistorted GPU
+// texture and associated exposure metadata through SteamVR's client API.
+// No Room View/dashboard activation, driver hooks, or CPU frame readback.
 class CameraSource {
 public:
     CameraSource();
     ~CameraSource();
-
     CameraSource(const CameraSource&) = delete;
     CameraSource& operator=(const CameraSource&) = delete;
-
-    // Returns false if the driver shared memory is unavailable. In that case
-    // the layer falls through and behaves as a no-op.
-    bool start();
+    bool poll(ID3D11Device* device, CameraFrame& frame);
     void stop();
-
-    // Non-blocking. Returns false if no frame has been received yet.
-    bool try_get_latest(StereoFrame& out);
-
-    // Non-blocking. Reads the most recent driver pose from shared memory.
-    // Safe to call from any thread while the source is running.
-    bool get_latest_pose(Pose3f& out) const;
-
-    // Calibration is fetched once at start; safe to call any time afterwards.
-    const CameraIntrinsics& intrinsics(CameraId id) const;
-    const CameraParameters& params(CameraId id)     const;
-
-    bool is_running() const { return running_.load(); }
-
 private:
-    void thread_loop();
-
-    std::atomic<bool> running_{false};
-    std::thread       worker_;
-
-    // Double-buffered most-recent frame.
-    StereoFrame       front_;
-    std::mutex        front_mutex_;
-    std::atomic<bool> have_frame_{false};
-    uint64_t          last_seq_ = 0;
-
-    CameraIntrinsics  intrinsics_[2]{};
-    CameraParameters  params_[2]{};
-
-    struct Impl;            // pImpl to hide Windows headers from public users
+    struct Impl;
     std::unique_ptr<Impl> impl_;
 };
 
-}  // namespace psvr2pt
+void write_pipeline_status(const char* message);
+
+} // namespace psvr2pt

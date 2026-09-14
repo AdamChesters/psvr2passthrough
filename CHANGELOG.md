@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.7.0-hybrid-beta.1 (unreleased)
+
+Cross-compiled test candidate. Windows/headset validation is pending; testing
+is deferred at the owner's request. Earlier release claims below are historical.
+
+- Consume Toolkit's maximum-undistorted stereo camera texture through SteamVR.
+- Use published camera transforms/projection and exposure timestamps converted to OpenXR time.
+- Remove legacy camera-angle, IPD approximation, zoom and image-processing controls.
+- Preserve activation bindings and opacity; save beta settings separately for rollback.
+- Restore the game's D3D11 pipeline state after the camera pass; avoid repeated processing of unchanged frames.
+- Hide stale/invalid camera frames and retain outstanding swapchain waits without blocking the game.
+
 ### This is not expected to be perfect 1:1 of in headset passthrough at this Alpha stage but it is veeeeery usable. 
 
 ## v0.6-alpha

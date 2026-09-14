@@ -11,7 +11,6 @@ target_link_libraries(psvr2pt_render
         psvr2pt_core
         psvr2pt_config
     PRIVATE
-        Microsoft::DirectXTK
         d3d11
         dxgi
         d3dcompiler

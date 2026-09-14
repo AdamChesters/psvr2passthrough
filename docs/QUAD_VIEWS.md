@@ -1,3 +1,5 @@
+> Legacy release notes. For the current worktree beta see [HYBRID-BETA.md](HYBRID-BETA.md).
+
 # Using the layer alongside Quad-Views-Foveated (DCS World)
 
 [Quad-Views-Foveated](https://github.com/mbucchia/Quad-Views-Foveated) is
