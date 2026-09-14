@@ -1,6 +1,8 @@
 # assets/
 
-This folder is intentionally empty in source control.
+No model files are required by the hybrid beta. Camera frames come from
+PSVR2Toolkit through SteamVR's tracked-camera API. The layer no longer reads
+Sony's camera shared-memory interface directly.
 
-At runtime the layer reads camera frames directly from the SteamVR PSVR2 driver
-shared memory — no model files or additional assets are required.
+The required `openvr_api.dll` is packaged beside the layer DLL, not in this
+folder. See [the beta guide](../docs/HYBRID-BETA.md) for runtime requirements.
