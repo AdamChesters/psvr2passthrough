@@ -1,5 +1,6 @@
 #include "feedback_sender.h"
 #include "support_links.h"
+#include "feedback_payload.h"
 #include <windows.h>
 #include <winhttp.h>
 
@@ -42,9 +43,18 @@ bool post_feedback(const std::string& payload) {
         static_cast<DWORD>(payload.size()), 0) || !WinHttpReceiveResponse(request.handle, nullptr))
         return false;
     DWORD status = 0, status_size = sizeof(status);
-    return WinHttpQueryHeaders(request.handle, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
+    if (!(WinHttpQueryHeaders(request.handle, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
         WINHTTP_HEADER_NAME_BY_INDEX, &status, &status_size, WINHTTP_NO_HEADER_INDEX) &&
-        status >= 200 && status < 300;
+        status >= 200 && status < 300)) return false;
+    std::string response;
+    char buffer[1024];
+    DWORD received=0;
+    do {
+        if(!WinHttpReadData(request.handle,buffer,sizeof(buffer),&received)) return false;
+        if(response.size()+received>4096) return false;
+        response.append(buffer,received);
+    }while(received);
+    return feedback_acknowledged(response);
 }
 }
 FeedbackSender::~FeedbackSender() { shutdown(); }
