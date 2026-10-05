@@ -29,7 +29,7 @@ bool post_feedback(const std::string& payload) {
     HttpHandle session(WinHttpOpen(L"AdamChApps/feedback",
         WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0));
     if (!session.handle) return false;
-    WinHttpSetTimeouts(session.handle, 5000, 5000, 5000, 5000);
+    if(!WinHttpSetTimeouts(session.handle,5000,5000,5000,5000))return false;
     HttpHandle connection(WinHttpConnect(session.handle, host.c_str(), parts.nPort, 0));
     if (!connection.handle) return false;
     HttpHandle request(WinHttpOpenRequest(connection.handle, L"POST", path.c_str(),
@@ -37,7 +37,7 @@ bool post_feedback(const std::string& payload) {
     if (!request.handle) return false;
     // Do not forward contact details to a redirected destination.
     DWORD redirects = WINHTTP_OPTION_REDIRECT_POLICY_NEVER;
-    WinHttpSetOption(request.handle, WINHTTP_OPTION_REDIRECT_POLICY, &redirects, sizeof(redirects));
+    if(!WinHttpSetOption(request.handle,WINHTTP_OPTION_REDIRECT_POLICY,&redirects,sizeof(redirects)))return false;
     if (!WinHttpSendRequest(request.handle, L"Content-Type: application/json\r\n", -1L,
         const_cast<char*>(payload.data()), static_cast<DWORD>(payload.size()),
         static_cast<DWORD>(payload.size()), 0) || !WinHttpReceiveResponse(request.handle, nullptr))
