@@ -8,6 +8,8 @@ namespace psvr2pt {
 UpdateChecker::~UpdateChecker() { shutdown(); }
 
 void UpdateChecker::start(const char* current_version) {
+    shutdown();
+    { std::lock_guard<std::mutex> lk(mutex_); state_ = State::Pending; latest_tag_.clear(); }
     thread_ = std::thread(&UpdateChecker::run, this, std::string(current_version));
 }
 
@@ -85,7 +87,7 @@ std::string extract_json_string(const std::string& json, const char* key) {
 void UpdateChecker::run(std::string current_version) {
     const std::string body = http_get(
         L"api.github.com",
-        L"/repos/Obsidiate/psvr2passthrough/releases/latest");
+        L"/repos/AdamChesters/psvr2passthrough/releases/latest");
 
     const std::string tag = extract_json_string(body, "tag_name");
 
