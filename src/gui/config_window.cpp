@@ -1,5 +1,7 @@
 #include "config_window.h"
 #include "version.h"
+#include "support_links.h"
+#include "feedback_payload.h"
 
 #include <imgui.h>
 #include <windows.h>
@@ -77,6 +79,7 @@ void ConfigWindow::initialise(ID3D11Device* device, ID3D11DeviceContext* ctx) {
 void ConfigWindow::shutdown() {
     capturer_.close_devices();
     update_checker_.shutdown();
+    feedback_sender_.shutdown();
 }
 
 void ConfigWindow::draw() {
@@ -89,7 +92,10 @@ void ConfigWindow::draw() {
                            | ImGuiWindowFlags_NoBringToFrontOnFocus;
     ImGui::Begin("##root", nullptr, flags);
 
-    ImGui::TextUnformatted("PSVR2 Passthrough Layer — Configuration");
+    ImGui::TextUnformatted("PSVR2 Passthrough Layer - Configuration");
+    ImGui::SameLine();
+    if (ImGui::Button("Feedback / Donate", ImVec2(0, 32)))
+        ImGui::OpenPopup("Feedback / Donate##support");
     ImGui::Separator();
     draw_update_banner();
     TextHint("Changes apply when your sim next starts. Save then restart your sim.");
@@ -114,6 +120,12 @@ void ConfigWindow::draw() {
         ImGui::EndTable();
     }
 
+    draw_support_dialog();
+    if (open_feedback_) {
+        ImGui::OpenPopup("Feedback / feature request##feedback");
+        open_feedback_ = false;
+    }
+    draw_feedback_dialog();
     ImGui::End();
 
     dirty_ = !configs_equal(working_, on_disk_);

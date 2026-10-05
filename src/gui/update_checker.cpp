@@ -8,6 +8,8 @@ namespace psvr2pt {
 UpdateChecker::~UpdateChecker() { shutdown(); }
 
 void UpdateChecker::start(const char* current_version) {
+    shutdown();
+    { std::lock_guard<std::mutex> lk(mutex_); state_ = State::Pending; latest_tag_.clear(); }
     thread_ = std::thread(&UpdateChecker::run, this, std::string(current_version));
 }
 

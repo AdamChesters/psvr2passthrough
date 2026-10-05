@@ -2,6 +2,13 @@
 
 ### This is not expected to be perfect 1:1 of in headset passthrough at this Alpha stage but it is veeeeery usable. 
 
+## v0.6.1-alpha
+
+- Added a prominent Feedback / Donate button in the configuration GUI.
+- Added an app-specific support panel with Discord, updates, project links and donation options.
+- Added feedback submission identifying PSVR2 Passthrough and its version. No logs are attached.
+- Updated the existing update checker and release links to the AdamChesters repository.
+
 ## v0.6-alpha
 
 **Direct3D 12 game support**
