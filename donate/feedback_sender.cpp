@@ -1,10 +1,10 @@
 #include "feedback_sender.h"
-#include "support_links.h"
+#include "support_content.hpp"
 #include "feedback_payload.h"
 #include <windows.h>
 #include <winhttp.h>
 
-namespace psvr2pt {
+namespace adamch_support {
 namespace {
 struct HttpHandle {
     HINTERNET handle = nullptr;
@@ -13,11 +13,11 @@ struct HttpHandle {
 };
 bool post_feedback(const std::string& payload) {
     // The public relay owns delivery credentials. No webhook secret belongs in the app.
-    if (kFeedbackEndpoint[0] == '\0') return false;
-    const int size = MultiByteToWideChar(CP_UTF8, 0, kFeedbackEndpoint, -1, nullptr, 0);
+    if (content::feedbackEndpoint[0] == '\0') return false;
+    const int size = MultiByteToWideChar(CP_UTF8, 0, content::feedbackEndpoint, -1, nullptr, 0);
     if (size <= 1) return false;
     std::wstring url(size, L'\0');
-    MultiByteToWideChar(CP_UTF8, 0, kFeedbackEndpoint, -1, url.data(), size);
+    MultiByteToWideChar(CP_UTF8, 0, content::feedbackEndpoint, -1, url.data(), size);
     URL_COMPONENTS parts{};
     parts.dwStructSize = sizeof(parts);
     parts.dwHostNameLength = static_cast<DWORD>(-1);
@@ -26,7 +26,7 @@ bool post_feedback(const std::string& payload) {
         return false;
     const std::wstring host(parts.lpszHostName, parts.dwHostNameLength);
     const std::wstring path(parts.lpszUrlPath, parts.dwUrlPathLength);
-    HttpHandle session(WinHttpOpen(L"PSVR2PassthroughConfig/feedback",
+    HttpHandle session(WinHttpOpen(L"AdamChApps/feedback",
         WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0));
     if (!session.handle) return false;
     WinHttpSetTimeouts(session.handle, 5000, 5000, 5000, 5000);
@@ -45,13 +45,23 @@ bool post_feedback(const std::string& payload) {
     DWORD status = 0, status_size = sizeof(status);
     if (!(WinHttpQueryHeaders(request.handle, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
         WINHTTP_HEADER_NAME_BY_INDEX, &status, &status_size, WINHTTP_NO_HEADER_INDEX) &&
-        status >= 200 && status < 300)) return false;
+        status == content::feedbackHttpStatus)) return false;
+    wchar_t media_type[128]{};
+    DWORD media_size=sizeof(media_type);
+    if(!WinHttpQueryHeaders(request.handle,WINHTTP_QUERY_CONTENT_TYPE,
+        WINHTTP_HEADER_NAME_BY_INDEX,media_type,&media_size,WINHTTP_NO_HEADER_INDEX)) return false;
+    std::string mime;
+    for(wchar_t c:media_type){if(!c)break;if(c>127)return false;mime+=static_cast<char>(c);}
+    const auto semicolon=mime.find(';');
+    mime=trim_feedback(mime.substr(0,semicolon));
+    for(char& c:mime)c=static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    if(mime!=content::feedbackContentType)return false;
     std::string response;
     char buffer[1024];
     DWORD received=0;
     do {
         if(!WinHttpReadData(request.handle,buffer,sizeof(buffer),&received)) return false;
-        if(response.size()+received>4096) return false;
+        if(response.size()+received>content::feedbackMaxBytes) return false;
         response.append(buffer,received);
     }while(received);
     return feedback_acknowledged(response);
@@ -76,4 +86,4 @@ void FeedbackSender::run(std::string payload) {
     std::lock_guard<std::mutex> lock(mutex_);
     state_ = sent ? State::Sent : State::Failed;
 }
-} // namespace psvr2pt
+} // namespace adamch_support

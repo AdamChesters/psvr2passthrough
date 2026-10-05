@@ -4,7 +4,7 @@
 #include <string>
 #include <string_view>
 
-namespace psvr2pt {
+namespace adamch_support {
 inline std::string trim_feedback(std::string value) {
     const auto first = value.find_first_not_of(" \t\r\n");
     if (first == std::string::npos) return {};
@@ -42,9 +42,9 @@ inline bool valid_feedback_email(std::string_view email) {
     return dot != std::string_view::npos && dot > at + 1 && dot + 1 < email.size();
 }
 inline std::string feedback_payload(std::string_view name, std::string_view email,
-                                    std::string_view message, std::string_view version) {
-    return "{\"app\":\"psvr2passthrough\",\"name\":" + json_feedback_string(name) +
+                                    std::string_view message, std::string_view version, std::string_view appId) {
+    return "{\"app\":" + json_feedback_string(appId) + ",\"name\":" + json_feedback_string(name) +
         ",\"email\":" + json_feedback_string(email) + ",\"message\":" + json_feedback_string(message) +
         ",\"version\":" + json_feedback_string(version) + "}";
 }
-} // namespace psvr2pt
+} // namespace adamch_support

@@ -3,7 +3,7 @@
 #include <string>
 #include <thread>
 
-namespace psvr2pt {
+namespace adamch_support {
 class FeedbackSender {
 public:
     enum class State { Idle, Sending, Sent, Failed };
@@ -17,4 +17,4 @@ private:
     mutable std::mutex mutex_;
     State state_ = State::Idle;
 };
-} // namespace psvr2pt
+} // namespace adamch_support

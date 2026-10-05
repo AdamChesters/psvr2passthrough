@@ -30,6 +30,8 @@ find_package(imgui CONFIG REQUIRED)         # vcpkg: imgui[win32-binding,dx11-bi
 # DirectXMath ships with the Windows SDK - no find_package needed.
 
 # Subprojects ----------------------------------------------------------------
+enable_testing()
+add_subdirectory(donate)
 add_subdirectory(src/config)      # shared config (used by both layer and GUI)
 add_subdirectory(src/core)        # camera ingest, undistortion, shared-memory, input binding
 add_subdirectory(src/render)      # D3D11 compositor used by the layer
@@ -42,3 +44,6 @@ add_subdirectory(src/gui)         # standalone configurator executable
 # live with the target definition because add_custom_command(TARGET ...) is
 # directory-scoped, and we need $<CONFIG> / $<TARGET_FILE:...> generator
 # expressions that only resolve at build time.
+add_executable(feedback_payload_tests tests/feedback_payload_test.cpp)
+target_include_directories(feedback_payload_tests PRIVATE donate)
+add_test(NAME feedback_payload COMMAND feedback_payload_tests)

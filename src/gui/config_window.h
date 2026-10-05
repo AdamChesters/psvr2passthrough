@@ -3,7 +3,7 @@
 #include "config.h"
 #include "input_binding.h"
 #include "update_checker.h"
-#include "feedback_sender.h"
+#include "support_panel.h"
 
 #include <d3d11.h>
 #include <memory>
@@ -27,8 +27,7 @@ private:
     void draw_about_panel();
     void draw_binding_capture_button();
     void draw_update_banner();
-    void draw_support_dialog();
-    void draw_feedback_dialog();
+    void draw_support_panel();
 
     Config working_;
     Config on_disk_;
@@ -46,13 +45,7 @@ private:
 
     std::string   intrinsics_text_;   // cached snippet from calibration_dump.txt
     UpdateChecker update_checker_;
-    FeedbackSender feedback_sender_;
-    bool open_feedback_ = false;
-    bool feedback_sent_seen_ = false;
-    char feedback_name_[401]{};
-    char feedback_email_[1017]{};
-    char feedback_message_[16001]{};
-    std::string feedback_error_;
+    adamch_support::SupportPanel support_panel_;
 };
 
 }  // namespace psvr2pt

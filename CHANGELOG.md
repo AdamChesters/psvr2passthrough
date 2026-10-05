@@ -6,6 +6,7 @@
 
 - Added a prominent Feedback / Donate button in the configuration GUI.
 - Added an app-specific support panel with Discord, updates, project links and donation options.
+- Standardized the bundled support panel and donation links in `/donate` and the README.
 - Added feedback submission identifying PSVR2 Passthrough and its version. No logs are attached.
 - Updated the existing update checker and release links to the AdamChesters repository.
 

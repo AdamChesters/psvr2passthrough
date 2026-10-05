@@ -1,0 +1,13 @@
+{
+  "component": "adamch-support",
+  "version": "1.0.0",
+  "schemaVersion": 1,
+  "identityVariables": [
+    "appName",
+    "appLogo",
+    "appVersion",
+    "appId"
+  ],
+  "updateCallback": "checkForUpdates",
+  "distribution": "bundled; no runtime remote code"
+}

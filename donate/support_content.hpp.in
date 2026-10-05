@@ -1,0 +1,35 @@
+#pragma once
+#include <cstddef>
+namespace adamch_support {
+namespace content {
+inline constexpr const char* title="@SUPPORT_TITLE@";
+inline constexpr const char* intro="@SUPPORT_INTRO@";
+inline constexpr const char* projects="@SUPPORT_PROJECTS@";
+inline constexpr const char* donationTitle="@SUPPORT_DONATION_TITLE@";
+inline constexpr const char* donationText="@SUPPORT_DONATION_TEXT@";
+inline constexpr const char* discord="@SUPPORT_DISCORD@";
+inline constexpr const char* github="@SUPPORT_GITHUB@";
+inline constexpr const char* website="@SUPPORT_WEBSITE@";
+inline constexpr const char* discordLabel="@SUPPORT_DISCORD_LABEL@";
+inline constexpr const char* feedbackLabel="@SUPPORT_FEEDBACK_LABEL@";
+inline constexpr const char* updateLabel="@SUPPORT_UPDATE_LABEL@";
+inline constexpr const char* feedbackEndpoint="@SUPPORT_FEEDBACK_ENDPOINT@";
+inline constexpr const char* feedbackTitle="@SUPPORT_FEEDBACK_TITLE@";
+inline constexpr const char* feedbackIntro="@SUPPORT_FEEDBACK_INTRO@";
+inline constexpr const char* feedbackPrivacy="@SUPPORT_FEEDBACK_PRIVACY@";
+inline constexpr const char* feedbackSuccess="@SUPPORT_FEEDBACK_SUCCESS@";
+inline constexpr const char* feedbackFailure="@SUPPORT_FEEDBACK_FAILURE@";
+inline constexpr const char* feedbackSubmit="@SUPPORT_FEEDBACK_SUBMIT@";
+inline constexpr const char* feedbackPlaceholder="@SUPPORT_FEEDBACK_PLACEHOLDER@";
+inline constexpr std::size_t feedbackMaxBytes=@SUPPORT_FEEDBACK_MAX_BYTES@;
+inline constexpr unsigned feedbackHttpStatus=@SUPPORT_FEEDBACK_STATUS@;
+inline constexpr const char* feedbackContentType="@SUPPORT_FEEDBACK_CONTENT_TYPE@";
+inline constexpr const char* nameLabel="@SUPPORT_FIELD_0_LABEL@";
+inline constexpr const char* emailLabel="@SUPPORT_FIELD_1_LABEL@";
+inline constexpr const char* messageLabel="@SUPPORT_FIELD_2_LABEL@";
+inline constexpr std::size_t nameMax=@SUPPORT_FIELD_0_MAX@,emailMax=@SUPPORT_FIELD_1_MAX@,messageMax=@SUPPORT_FIELD_2_MAX@;
+struct Platform {const char* label;const char* url;const char* notes;};
+inline constexpr Platform platforms[]={
+@SUPPORT_PLATFORMS@};
+} // namespace content
+} // namespace adamch_support
