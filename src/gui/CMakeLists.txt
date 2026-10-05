@@ -4,15 +4,12 @@ add_executable(PSVR2PassthroughConfig WIN32
     config_window.h
     update_checker.cpp
     update_checker.h
-    support_dialog.cpp
-    feedback_sender.cpp
-    feedback_sender.h
-    feedback_payload.h
-    support_links.h
+    support_adapter.cpp
     version.h
 )
 
 target_link_libraries(PSVR2PassthroughConfig PRIVATE
+    adamch_support
     psvr2pt_config
     psvr2pt_core
     imgui::imgui

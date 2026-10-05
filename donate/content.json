@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "title": "Feedback / Donate",
+  "intro": "Thanks for using {appName}. Feedback is always welcome. The quickest way to get my attention is the Feedback button above. You can also open an issue on GitHub or join the Discord.",
+  "projectsText": "In the meantime, I have a variety of other fun software projects. Check out:",
+  "donationTitle": "Donate",
+  "donationText": "I love making things. Anything I've ever built has been to have fun, share fun, and make life a bit easier. If you got value from one of these things, and you'd like to chuck us a coffee, a bottle, or a god damned Ferrari, go your hardest. Then hustle over to discord to claim your supporter role!",
+  "links": {
+    "discord": "https://discord.gg/fs4WyaQPA",
+    "github": "https://github.com/AdamChesters",
+    "website": "https://adamch.com"
+  },
+  "actions": {
+    "discord": "Join the Discord",
+    "feedback": "Feedback",
+    "update": "Check for updates"
+  },
+  "platforms": [
+    {
+      "id": "github",
+      "label": "GitHub Sponsors",
+      "url": "https://github.com/sponsors/AdamChesters",
+      "notes": [
+        "Account required",
+        "0% fees to creator"
+      ],
+      "icon": "assets/github.svg"
+    },
+    {
+      "id": "buymeacoffee",
+      "label": "Buy Me a Coffee",
+      "url": "https://buymeacoffee.com/adamch",
+      "notes": [
+        "Guest checkout available"
+      ],
+      "icon": "assets/buymeacoffee.svg"
+    },
+    {
+      "id": "paypal",
+      "label": "Donate with PayPal",
+      "url": "https://www.paypal.com/donate/?business=KLHSZPXTSVSAU&no_recurring=0&item_name=I%27ve+donated+to+lots+of+small+creators+for+their+useful+little+tools%2C+now+I+create+them.+Dig+one?+I%27d+love+your+support.&currency_code=AUD",
+      "notes": [
+        "Guest checkout available",
+        "Least preferred option"
+      ],
+      "icon": "assets/paypal.svg"
+    }
+  ],
+  "feedback": {
+    "endpoint": "https://adamch-app-feedback.adam-chesters.workers.dev/feedback",
+    "title": "Feedback / feature request",
+    "intro": "Have an idea or found a problem? Send it to the {appName} team.",
+    "fields": [
+      {
+        "id": "name",
+        "label": "Name",
+        "maxLength": 100,
+        "required": true
+      },
+      {
+        "id": "email",
+        "label": "Email",
+        "maxLength": 254,
+        "required": true
+      },
+      {
+        "id": "message",
+        "label": "Message",
+        "maxLength": 4000,
+        "required": true
+      }
+    ],
+    "placeholder": "What would you like to improve?",
+    "privacy": "Only your name, email, message, app name and version are sent. No logs or app data are attached.",
+    "submit": "Send feedback",
+    "success": "Feedback sent. Thank you!",
+    "failure": "Delivery could not be confirmed. Your message is still here. Please try again later.",
+    "ack": {
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "body": {
+        "ok": true
+      },
+      "maxBytes": 1024
+    }
+  }
+}
