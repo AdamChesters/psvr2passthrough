@@ -20,6 +20,19 @@ inline std::string json_feedback_string(std::string_view value) {
     }
     return result + "\"";
 }
+// The shared relay acknowledges accepted delivery with exactly {"ok":true}.
+inline bool feedback_acknowledged(std::string_view response) {
+    const auto skip_space=[&response]{
+        while(!response.empty() && (response.front()==' ' || response.front()=='\t' || response.front()=='\r' || response.front()=='\n')) response.remove_prefix(1);
+    };
+    for(std::string_view token : {"{", "\"ok\"", ":", "true", "}"}) {
+        skip_space();
+        if(!response.starts_with(token)) return false;
+        response.remove_prefix(token.size());
+    }
+    skip_space();
+    return response.empty();
+}
 inline bool valid_feedback_email(std::string_view email) {
     const auto at = email.find('@');
     if (at == std::string_view::npos || at == 0 || at + 1 >= email.size() ||
