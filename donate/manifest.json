@@ -1,7 +1,7 @@
 {
   "component": "adamch-support",
-  "version": "1.0.0",
-  "schemaVersion": 1,
+  "version": "2.0.0",
+  "schemaVersion": 2,
   "identityVariables": [
     "appName",
     "appLogo",

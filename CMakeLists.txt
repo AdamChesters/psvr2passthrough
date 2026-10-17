@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(PSVR2PassthroughLayer LANGUAGES CXX)
+project(PSVR2PassthroughLayer LANGUAGES CXX RC)
 
 if(NOT WIN32)
     message(FATAL_ERROR "This project targets Windows only (PSVR2 PC adapter is Windows-only).")

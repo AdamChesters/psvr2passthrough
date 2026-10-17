@@ -2,7 +2,7 @@
 
 namespace psvr2pt {
 
-inline constexpr const char* kCurrentVersion = "v0.6.1-alpha";
+inline constexpr const char* kCurrentVersion = "v0.6.2-alpha";
 inline constexpr const char* kRepoUrl        = "https://github.com/AdamChesters/psvr2passthrough";
 inline constexpr const char* kReleasesUrl    = "https://github.com/AdamChesters/psvr2passthrough/releases";
 inline constexpr const char* kDiscussionsUrl = "https://github.com/AdamChesters/psvr2passthrough/discussions";

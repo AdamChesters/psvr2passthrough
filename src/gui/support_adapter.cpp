@@ -17,6 +17,7 @@ void ConfigWindow::draw_support_panel(){
         draw->AddCircleFilled(ImVec2(middle-22,origin.y+25),4,color);draw->AddCircleFilled(ImVec2(middle+22,origin.y+25),4,color);
         ImGui::Dummy(ImVec2(0,53));
     };
+    identity.socialIcon=[this](const char* icon){return social_icons_.get(device_,icon);};
     const auto state=update_checker_.state();
     identity.updateStatus=state==UpdateChecker::State::Pending?"Checking for updates...":state==UpdateChecker::State::UpToDate?"Latest version installed.":state==UpdateChecker::State::Available?"Update available: "+update_checker_.latest_tag():"Update check failed. You can open the releases page.";
     identity.checkForUpdates=[this]{

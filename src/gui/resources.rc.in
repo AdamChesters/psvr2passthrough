@@ -1,0 +1,6 @@
+// Social logos for the support panel (PNG copies of donate/assets). IDs match social_icons.cpp.
+203 RCDATA "@PSVR2PT_DONATE_DIR@/assets/discord.png"
+204 RCDATA "@PSVR2PT_DONATE_DIR@/assets/reddit.png"
+205 RCDATA "@PSVR2PT_DONATE_DIR@/assets/github-mark.png"
+206 RCDATA "@PSVR2PT_DONATE_DIR@/assets/linkedin.png"
+207 RCDATA "@PSVR2PT_DONATE_DIR@/assets/website.png"

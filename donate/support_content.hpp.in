@@ -4,13 +4,8 @@ namespace adamch_support {
 namespace content {
 inline constexpr const char* title="@SUPPORT_TITLE@";
 inline constexpr const char* intro="@SUPPORT_INTRO@";
-inline constexpr const char* projects="@SUPPORT_PROJECTS@";
 inline constexpr const char* donationTitle="@SUPPORT_DONATION_TITLE@";
 inline constexpr const char* donationText="@SUPPORT_DONATION_TEXT@";
-inline constexpr const char* discord="@SUPPORT_DISCORD@";
-inline constexpr const char* github="@SUPPORT_GITHUB@";
-inline constexpr const char* website="@SUPPORT_WEBSITE@";
-inline constexpr const char* discordLabel="@SUPPORT_DISCORD_LABEL@";
 inline constexpr const char* feedbackLabel="@SUPPORT_FEEDBACK_LABEL@";
 inline constexpr const char* updateLabel="@SUPPORT_UPDATE_LABEL@";
 inline constexpr const char* feedbackEndpoint="@SUPPORT_FEEDBACK_ENDPOINT@";
@@ -31,5 +26,8 @@ inline constexpr std::size_t nameMax=@SUPPORT_FIELD_0_MAX@,emailMax=@SUPPORT_FIE
 struct Platform {const char* label;const char* url;const char* notes;};
 inline constexpr Platform platforms[]={
 @SUPPORT_PLATFORMS@};
+struct Social {const char* label;const char* url;const char* icon;unsigned rgb;};
+inline constexpr Social socials[]={
+@SUPPORT_SOCIALS@};
 } // namespace content
 } // namespace adamch_support

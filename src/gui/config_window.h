@@ -3,6 +3,7 @@
 #include "config.h"
 #include "input_binding.h"
 #include "update_checker.h"
+#include "social_icons.h"
 #include "support_panel.h"
 
 #include <d3d11.h>
@@ -46,6 +47,7 @@ private:
     std::string   intrinsics_text_;   // cached snippet from calibration_dump.txt
     UpdateChecker update_checker_;
     adamch_support::SupportPanel support_panel_;
+    SocialIcons   social_icons_;
 };
 
 }  // namespace psvr2pt

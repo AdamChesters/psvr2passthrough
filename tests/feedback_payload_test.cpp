@@ -1,3 +1,5 @@
+// Keep assertions active in Release test builds.
+#undef NDEBUG
 #include "feedback_payload.h"
 #include <cassert>
 #include <iostream>
@@ -13,7 +15,7 @@ int main() {
     assert(valid_feedback_email("person@example.com"));
     for (const char* email : {"", "bad", "@example.com", "x@y", "x@@z.com", "x@z.", "x@ .com"})
         assert(!valid_feedback_email(email));
-    const auto payload = feedback_payload("Name\"\\", "person@example.com", "line one\nline two\t\x01", "v0.6.1-alpha", "psvr2passthrough");
+    const auto payload = feedback_payload("Name\"\\", "person@example.com", "line one\nline two\t\x01", "v0.6.2-alpha", "psvr2passthrough");
     assert(payload.find("\"app\":\"psvr2passthrough\"") != std::string::npos);
     assert(payload.find("Name\\\"\\\\") != std::string::npos);
     assert(payload.find("\\u000a") != std::string::npos);

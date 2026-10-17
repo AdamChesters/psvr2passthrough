@@ -6,6 +6,7 @@
 // on screen with an ImGui context attached.
 
 #include <windows.h>
+#include <objbase.h>
 #include <d3d11.h>
 #include <tchar.h>
 
@@ -52,6 +53,8 @@ static LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
+    // COM for the support panel's embedded logos (WIC) and ShellExecute links.
+    const HRESULT com = ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
     WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L,
                        hInstance, nullptr, nullptr, nullptr, nullptr,
                        L"PSVR2PassthroughConfig", nullptr };
@@ -65,6 +68,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     if (!CreateDeviceD3D(hwnd)) {
         CleanupDeviceD3D();
         ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+        if (SUCCEEDED(com)) ::CoUninitialize();
         return 1;
     }
 
@@ -124,6 +128,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     CleanupDeviceD3D();
     ::DestroyWindow(hwnd);
     ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+    if (SUCCEEDED(com)) ::CoUninitialize();
     return 0;
 }
 

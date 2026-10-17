@@ -8,6 +8,7 @@ namespace adamch_support {
 struct AppIdentity {
     std::string appName,appVersion,appId;
     std::function<void()> appLogo,checkForUpdates;
+    std::function<void*(const char* icon)> socialIcon; // texture for a socials[].icon asset
     std::string updateStatus;
     float scale=1.f;
 };

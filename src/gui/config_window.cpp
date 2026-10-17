@@ -78,6 +78,7 @@ void ConfigWindow::shutdown() {
     capturer_.close_devices();
     update_checker_.shutdown();
     support_panel_.shutdown();
+    social_icons_.clear();
 }
 
 void ConfigWindow::draw() {
@@ -92,7 +93,7 @@ void ConfigWindow::draw() {
 
     ImGui::TextUnformatted("PSVR2 Passthrough Layer - Configuration");
     ImGui::SameLine();
-    if (ImGui::Button("Feedback / Donate", ImVec2(0, 32)))
+    if (ImGui::Button(adamch_support::content::title, ImVec2(0, 32)))
         support_panel_.open();
     ImGui::Separator();
     draw_update_banner();

@@ -65,22 +65,35 @@ void SupportPanel::drawSupport(const AppIdentity& identity) {
     ImGui::Text("Version %s",identity.appVersion.c_str());
     if(!identity.updateStatus.empty())hint(identity.updateStatus.c_str());
     ImGui::Spacing();
-    if (ImGui::Button(content::discordLabel, size(0,36,identity.scale))) visit(content::discord);
-    ImGui::SameLine();
     if(ImGui::Button(content::updateLabel,size(0,36,identity.scale))){update_requested_=true;ImGui::CloseCurrentPopup();}
     ImGui::SameLine();
     if (ImGui::Button(content::feedbackLabel, size(0,36,identity.scale))) {
         open_feedback_ = true;
         ImGui::CloseCurrentPopup();
     }
+    // Equal brand-coloured logo buttons. The host supplies each logo texture through socialIcon.
+    const float side=38*identity.scale,glyph=19*identity.scale,gap=ImGui::GetStyle().ItemSpacing.x;
+    const float row=std::size(content::socials)*side+(std::size(content::socials)-1)*gap;
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX()+std::max(0.f,(ImGui::GetContentRegionAvail().x-row)*.5f));
+    for(size_t index=0;index<std::size(content::socials);++index){
+        const auto& social=content::socials[index];
+        if(index)ImGui::SameLine();
+        const ImVec4 brand=ImColor(int(social.rgb>>16&0xff),int(social.rgb>>8&0xff),int(social.rgb&0xff));
+        ImGui::PushStyleColor(ImGuiCol_Button,brand);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered,ImVec4(brand.x*.9f,brand.y*.9f,brand.z*.9f,1));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive,ImVec4(brand.x*.8f,brand.y*.8f,brand.z*.8f,1));
+        ImGui::PushStyleColor(ImGuiCol_Text,ImVec4(1,1,1,1));
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding,ImVec2((side-glyph)*.5f,(side-glyph)*.5f));
+        void* texture=identity.socialIcon?identity.socialIcon(social.icon):nullptr;
+        const bool clicked=texture?ImGui::ImageButton(social.label,ImTextureID(reinterpret_cast<uintptr_t>(texture)),ImVec2(glyph,glyph))
+                                  :ImGui::Button(social.label,ImVec2(0,side));
+        ImGui::PopStyleVar();
+        ImGui::PopStyleColor(4);
+        if(ImGui::IsItemHovered())ImGui::SetTooltip("%s",social.label);
+        if(clicked)visit(social.url);
+    }
     ImGui::Spacing();
     ImGui::TextWrapped("%s",describe(content::intro,identity.appName).c_str());
-    ImGui::Spacing();
-    ImGui::TextWrapped("%s",content::projects);
-    if (ImGui::Button("GitHub")) visit(content::github);
-    ImGui::SameLine();
-    if (ImGui::Button("AdamCh.com")) visit(content::website);
-    ImGui::Spacing();
     ImGui::SeparatorText(content::donationTitle);
     ImGui::TextWrapped("%s",content::donationText);
     ImGui::Spacing();

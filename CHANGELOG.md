@@ -2,6 +2,12 @@
 
 ### This is not expected to be perfect 1:1 of in headset passthrough at this Alpha stage but it is veeeeery usable. 
 
+## v0.6.2-alpha
+
+- The configuration GUI button is now **Feedback / Support**.
+- Refreshed support panel: "Check for updates" and "Feedback form" side by side, logo buttons for Discord, Reddit, GitHub, LinkedIn and AdamCh.com, and a Support section with GitHub Sponsors, Buy Me a Coffee and PayPal.
+- Passthrough, camera and layer behaviour are unchanged.
+
 ## v0.6.1-alpha
 
 - Added a prominent Feedback / Donate button in the configuration GUI.
